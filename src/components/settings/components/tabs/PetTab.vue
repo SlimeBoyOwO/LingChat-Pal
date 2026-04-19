@@ -1,5 +1,5 @@
 <template>
-  <article class="w-full h-full flex flex-col">
+  <article class="w-full flex-1 flex flex-col">
     <header
       class="mb-6 flex items-end justify-between border-b-2 pb-2 transition-colors"
       :class="isDarkMode ? 'border-slate-700' : 'border-slate-100'"
@@ -28,7 +28,7 @@
     <div class="grid grid-cols-2 gap-4 mt-4">
       <div
         @click="selectMode('normal')"
-        class="rounded-xl border p-5 shadow-sm relative overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1"
+        class="rounded-xl border p-5 shadow-sm relative overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 min-h-35 flex flex-col"
         :class="[
           isDarkMode
             ? 'border-slate-700 hover:border-sky-500 hover:bg-slate-800'
@@ -53,24 +53,18 @@
           >
             <MessageSquare class="w-5 h-5" />
           </div>
-          <h3
-            class="font-bold text-lg"
-            :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
-          >
+          <h3 class="font-bold text-lg" :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'">
             陪伴模式
           </h3>
         </div>
-        <p
-          class="text-xs"
-          :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'"
-        >
+        <p class="text-xs" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">
           正常的桌宠陪伴模式捏
         </p>
       </div>
 
       <div
         @click="selectMode('game')"
-        class="rounded-xl border p-5 shadow-sm relative overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1"
+        class="rounded-xl border p-5 shadow-sm relative overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 min-h-35 flex flex-col"
         :class="[
           isDarkMode
             ? 'border-slate-700 hover:border-violet-500 hover:bg-slate-800'
@@ -95,17 +89,11 @@
           >
             <Gamepad2 class="w-5 h-5" />
           </div>
-          <h3
-            class="font-bold text-lg"
-            :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
-          >
+          <h3 class="font-bold text-lg" :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'">
             游戏模式
           </h3>
         </div>
-        <p
-          class="text-xs"
-          :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'"
-        >
+        <p class="text-xs" :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'">
           可以让ta更多的感知你的屏幕
         </p>
       </div>
@@ -113,11 +101,7 @@
 
     <div
       class="rounded-xl border mt-4 p-6 shadow-sm relative overflow-hidden group transition-colors duration-300"
-      :class="
-        isDarkMode
-          ? 'bg-slate-800/50 border-slate-700'
-          : 'bg-white border-slate-200'
-      "
+      :class="isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'"
     >
       <Ruler
         class="absolute -bottom-4 -right-4 w-32 h-32 opacity-50 -rotate-12 transition-all duration-300 group-hover:scale-110"
@@ -125,19 +109,22 @@
       />
 
       <div class="relative z-10">
+        <h3
+          class="font-bold text-lg mb-4 flex items-center gap-2"
+          :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
+        >
+          <Volume2 class="w-5 h-5 text-sky-500" />
+          桌宠大小设置
+        </h3>
         <div class="flex items-end gap-3 mb-6">
           <div class="text-4xl font-bold text-sky-500 tracking-tighter">
             {{ percentLabel }}
           </div>
           <div
             class="text-[10px] font-mono font-bold mb-1.5 px-2 py-0.5 rounded uppercase transition-colors"
-            :class="
-              isDarkMode
-                ? 'bg-slate-700 text-slate-400'
-                : 'bg-slate-100 text-slate-500'
-            "
+            :class="isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500'"
           >
-            Current Scale
+            CURRENT SCALE
           </div>
         </div>
 
@@ -182,11 +169,7 @@
 
     <div
       class="rounded-xl border p-6 shadow-sm relative overflow-hidden group transition-colors duration-300 mt-4"
-      :class="
-        isDarkMode
-          ? 'bg-slate-800/50 border-slate-700'
-          : 'bg-white border-slate-200'
-      "
+      :class="isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'"
     >
       <Sparkles
         class="absolute -bottom-4 -right-4 w-32 h-32 opacity-10 -rotate-12 transition-all duration-300 group-hover:scale-110"
@@ -199,7 +182,7 @@
           :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
         >
           <Sparkles class="w-5 h-5 text-sky-500" />
-          背景粒子效果
+          背景粒子效果 (无粒子更流畅)
         </h3>
 
         <div class="flex gap-3">
@@ -224,11 +207,79 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="rounded-xl border mt-4 p-6 shadow-sm relative overflow-hidden group transition-colors duration-300"
+      :class="isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'"
+    >
+      <Volume2
+        class="absolute -bottom-4 -right-4 w-32 h-32 opacity-10 -rotate-12 transition-all duration-300 group-hover:scale-110"
+        :class="isDarkMode ? 'text-slate-700' : 'text-slate-200'"
+      />
+
+      <div class="relative z-10">
+        <h3
+          class="font-bold text-lg mb-4 flex items-center gap-2"
+          :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
+        >
+          <Volume2 class="w-5 h-5 text-sky-500" />
+          桌宠音量大小
+        </h3>
+        <div class="flex items-end gap-3 mb-6">
+          <div class="text-4xl font-bold text-sky-500 tracking-tighter">
+            {{ volumeLabel }}
+          </div>
+          <div
+            class="text-[10px] font-mono font-bold mb-1.5 px-2 py-0.5 rounded uppercase transition-colors"
+            :class="isDarkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500'"
+          >
+            PET VOLUME
+          </div>
+        </div>
+
+        <div class="mt-8 mb-6 relative">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            :value="petVolume"
+            @input="onVolumeInput"
+            class="custom-slider"
+          />
+          <div
+            class="flex justify-between text-[11px] mt-4 font-mono font-bold transition-colors"
+            :class="isDarkMode ? 'text-slate-500' : 'text-slate-400'"
+          >
+            <span>MIN 0%</span>
+            <span
+              class="text-sky-500 relative pl-2 before:content-[''] before:absolute before:left-0 before:top-1.5 before:w-1 before:h-1 before:bg-sky-400 before:rounded-full"
+              >DEF 50%</span
+            >
+            <span>MAX 100%</span>
+          </div>
+        </div>
+
+        <div
+          class="flex justify-end pt-4 border-t mt-6 transition-colors"
+          :class="isDarkMode ? 'border-slate-700' : 'border-slate-100/80'"
+        >
+          <button
+            type="button"
+            @click="$emit('resetVolume')"
+            class="px-5 py-2 bg-sky-500 text-white font-bold text-[13px] rounded-lg transition-all hover:bg-sky-400 active:scale-95 flex items-center gap-2 shadow-[0_4px_12px_rgba(56,189,248,0.25)] hover:shadow-[0_6px_16px_rgba(56,189,248,0.35)]"
+          >
+            <RotateCcw class="w-4 h-4" />
+            恢复默认音量
+          </button>
+        </div>
+      </div>
+    </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed } from 'vue'
 import {
   Ruler,
   RotateCcw,
@@ -238,52 +289,65 @@ import {
   Ban,
   Stars,
   Sun,
-} from "lucide-vue-next";
-import { useUIStore } from "../../../../stores/modules/ui/ui";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+  Volume2,
+} from 'lucide-vue-next'
+import { useUIStore } from '../../../../stores/modules/ui/ui'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 
 const props = defineProps<{
-  isDarkMode: boolean;
-  petScale: number;
-  PET_SCALE_MIN: number;
-  PET_SCALE_MAX: number;
-}>();
+  isDarkMode: boolean
+  petScale: number
+  petVolume: number
+  PET_SCALE_MIN: number
+  PET_SCALE_MAX: number
+}>()
 
 const emit = defineEmits<{
-  updateScale: [value: number];
-  resetScale: [];
-}>();
+  updateScale: [value: number]
+  resetScale: []
+  updateVolume: [value: number]
+  resetVolume: []
+}>()
 
-const uiStore = useUIStore();
+const uiStore = useUIStore()
 
-const currentMode = ref("normal");
+const currentMode = ref('normal')
 const selectMode = (mode: string) => {
-  currentMode.value = mode;
+  currentMode.value = mode
   // 空函数，留作后续逻辑实现
-};
+}
 
-const currentParticle = computed(() => uiStore.currentBackgroundEffect);
+const currentParticle = computed(() => uiStore.currentBackgroundEffect)
 
 const particleOptions = [
-  { label: "无", value: "None", icon: Ban },
-  { label: "星空", value: "StarField", icon: Stars },
-  { label: "星辉", value: "BA", icon: Sun },
-];
+  { label: '无', value: 'None', icon: Ban },
+  { label: '星空', value: 'StarField', icon: Stars },
+  { label: '星辉', value: 'BA', icon: Sun },
+]
 
 const selectParticle = async (value: string) => {
-  uiStore.setBackgroundEffect(value);
-  const appWindow = getCurrentWindow();
-  await appWindow.emit("background-effect-changed", { effect: value });
-};
+  uiStore.setBackgroundEffect(value)
+  const appWindow = getCurrentWindow()
+  await appWindow.emit('background-effect-changed', { effect: value })
+}
 
 const percentLabel = computed(() => {
-  return `${Math.round(props.petScale * 100)}%`;
-});
+  return `${Math.round(props.petScale * 100)}%`
+})
+
+const volumeLabel = computed(() => {
+  return `${Math.round(props.petVolume)}%`
+})
 
 const onScaleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  emit("updateScale", Number(target.value));
-};
+  const target = event.target as HTMLInputElement
+  emit('updateScale', Number(target.value))
+}
+
+const onVolumeInput = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  emit('updateVolume', Number(target.value))
+}
 </script>
 
 <style scoped>

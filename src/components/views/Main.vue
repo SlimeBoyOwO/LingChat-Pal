@@ -40,6 +40,7 @@ import GameRolesStage from "../game/GameRolesStage.vue";
 import { useUIStore } from "../../stores/modules/ui/ui";
 
 const PET_SCALE_EVENT = "pet-scale-changed";
+const PET_VOLUME_EVENT = "pet-volume-changed";
 const DIALOG_HISTORY_EVENT = "dialog-history-changed";
 
 const BASE_AVATAR_SIZE = 240;
@@ -144,6 +145,7 @@ let unlistenScaleEvent: (() => void) | null = null;
 let unlistenDialogHistoryEvent: (() => void) | null = null;
 let unlistenSettingsEvent: UnlistenFn | null = null;
 let unlistenBackgroundEffectEvent: (() => void) | null = null;
+let unlistenVolumeEvent: (() => void) | null = null;
 let hitTestInterval: number | undefined;
 
 onMounted(async () => {
@@ -169,6 +171,15 @@ onMounted(async () => {
     const effect = event.payload?.effect;
     if (effect) {
       uiStore.setBackgroundEffect(effect);
+    }
+  });
+
+  unlistenVolumeEvent = await mainWindow.value.listen<{
+    volume: number;
+  }>(PET_VOLUME_EVENT, (event) => {
+    const volume = Number(event.payload?.volume);
+    if (!Number.isNaN(volume)) {
+      uiStore.setCharacterVolume(volume);
     }
   });
 
@@ -249,6 +260,10 @@ onUnmounted(() => {
   if (unlistenBackgroundEffectEvent) {
     unlistenBackgroundEffectEvent();
     unlistenBackgroundEffectEvent = null;
+  }
+  if (unlistenVolumeEvent) {
+    unlistenVolumeEvent();
+    unlistenVolumeEvent = null;
   }
   if (hitTestInterval !== undefined) {
     window.clearInterval(hitTestInterval);

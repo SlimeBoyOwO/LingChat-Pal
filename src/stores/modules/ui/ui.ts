@@ -150,6 +150,10 @@ export const useUIStore = defineStore('ui', {
     setBackgroundEffect(effect: string) {
       useSettingsStore().setBackgroundEffect(effect)
     },
+    setCharacterVolume(volume: number) {
+      const normalizedVolume = Math.min(100, Math.max(0, Math.round(volume)))
+      useSettingsStore().updateAudio({ characterVolume: normalizedVolume })
+    },
     setDarkMode(mode: boolean) {
       useSettingsStore().setDarkMode(mode)
     },
