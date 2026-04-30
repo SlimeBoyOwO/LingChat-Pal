@@ -21,7 +21,8 @@
         "shadow": false,
         "fullscreen": false,
         "resizable": false,
-        "maximized": false
+        "maximized": false,
+        "skipTaskbar": true
       },
       {
         "label": "second",

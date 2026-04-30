@@ -141,20 +141,23 @@ const saveSettings = async () => {
 
 const loadConfig = async () => {
   const configKeys = [
-    "ENABLE_PROACTIVE_SYSTEM",
-    "MAX_PROACTIVE_TIMES",
-    "VD_API_KEY",
-    "VD_BASE_URL",
-    "VD_MODEL",
-    "ENABLE_VISUAL_PRECEPTION",
-    "ENABLE_TOPIC_CREATER",
-    "ENABLE_TODO_PRECEPTION",
-    "ENABLE_SCHEDULE_REMINDER",
-    "ENABLE_IMPORTANT_DAY_REMINDER",
-  ];
+    'ENABLE_PROACTIVE_SYSTEM',
+    'MAX_PROACTIVE_TIMES',
+    'VD_API_KEY',
+    'VD_BASE_URL',
+    'VD_MODEL',
+    'ENABLE_VISUAL_PRECEPTION',
+    'SCREEN_WEIGHT',
+    'ENABLE_TOPIC_CREATER',
+    'TOPIC_WEIGHT',
+    'ENABLE_TODO_PRECEPTION',
+    'TODO_WEIGHT',
+    'ENABLE_SCHEDULE_REMINDER',
+    'ENABLE_IMPORTANT_DAY_REMINDER',
+  ]
 
   for (const key of configKeys) {
-    settings.value[key] = await getEnvConfigByKey(key);
+    settings.value[key] = await getEnvConfigByKey(key)
   }
 };
 

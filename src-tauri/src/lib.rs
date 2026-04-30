@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 use serde::Deserialize;
 use tauri::{Manager, Emitter, menu::{MenuBuilder, MenuItem}, tray::TrayIconBuilder};
 use tauri::async_runtime::spawn;
+use tauri_plugin_prevent_default::{Flags as PreventDefaultFlags, PreventDefault};
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Rect {
@@ -34,9 +35,23 @@ pub fn run() {
     };
 
     let solid_rects_clone = hit_test_state.solid_rects.clone();
+    let prevent_default = tauri_plugin_prevent_default::Builder::new()
+        .with_flags(PreventDefaultFlags::CONTEXT_MENU)
+        .build_with_manual_injection();
 
     tauri::Builder::default()
+        .plugin(prevent_default)
         .plugin(tauri_plugin_opener::init())
+        .on_page_load(|window, _| {
+            if window.label() != "main" {
+                return;
+            }
+
+            let script = window.app_handle().script().to_string();
+            if let Err(error) = window.eval(&script) {
+                eprintln!("failed to inject prevent-default script for main window: {error}");
+            }
+        })
         .manage(hit_test_state)
         .invoke_handler(tauri::generate_handler![greet, update_solid_regions])
         .setup(move |app| {
@@ -79,6 +94,20 @@ pub fn run() {
 
             // 2. Setup mouse poller for click-through
             let window = app.get_webview_window("main").unwrap();
+
+            #[cfg(target_os = "windows")]
+            {
+                let _ = window.with_webview(|platform_webview| unsafe {
+                    let Ok(webview2) = platform_webview.controller().CoreWebView2() else {
+                        return;
+                    };
+                    let Ok(settings) = webview2.Settings() else {
+                        return;
+                    };
+                    let _ = settings.SetAreDefaultContextMenusEnabled(false);
+                });
+            }
+
             let rects_arc = solid_rects_clone;
 
             spawn(async move {
