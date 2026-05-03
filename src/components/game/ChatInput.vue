@@ -13,7 +13,7 @@
         type="text"
         :placeholder="placeholderText"
         :readonly="!isInputEnabled"
-        class="flex-1 bg-transparent border-none outline-none text-white text-[calc(13px*var(--pet-ui-scale,1))] p-[calc(5px*var(--pet-ui-scale,1))] placeholder-white/60"
+        class="flex-1 bg-transparent border-none outline-none text-white text-[calc(13px*var(--pet-ui-scale,1))] p-[calc(5px*var(--pet-ui-scale,1))] input-stroke"
         @keyup.enter="sendMessage"
       />
       <button
@@ -109,5 +109,30 @@ const sendMessage = () => {
 /* 保留无法用Tailwind实现的特殊效果 */
 .chat-input-container {
   transform: scale(var(--pet-ui-scale, 1));
+}
+
+/* 字体描边效果 - 用于输入框文本（包括提示和已输入内容） */
+.input-stroke::placeholder {
+  text-shadow: 
+    -0.1px -0.1px 0 rgba(0, 0, 0, 0.8),
+    0.1px -0.1px 0 rgba(0, 0, 0, 0.8),
+    -0.1px 0.1px 0 rgba(0, 0, 0, 0.8),
+    0.1px 0.1px 0 rgba(0, 0, 0, 0.8),
+    0px -0.1px 0 rgba(0, 0, 0, 0.8),
+    0px 0.1px 0 rgba(0, 0, 0, 0.8),
+    -0.1px 0px 0 rgba(0, 0, 0, 0.8),
+    0.1px 0px 0 rgba(0, 0, 0, 0.8);
+}
+
+.input-stroke {
+  text-shadow: 
+    -0.1px -0.1px 0 rgba(0, 0, 0, 0.8),
+    0.1px -0.1px 0 rgba(0, 0, 0, 0.8),
+    -0.1px 0.1px 0 rgba(0, 0, 0, 0.8),
+    0.1px 0.1px 0 rgba(0, 0, 0, 0.8),
+    0px -0.1px 0 rgba(0, 0, 0, 0.8),
+    0px 0.1px 0 rgba(0, 0, 0, 0.8),
+    -0.1px 0px 0 rgba(0, 0, 0, 0.8),
+    0.1px 0px 0 rgba(0, 0, 0, 0.8);
 }
 </style>

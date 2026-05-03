@@ -25,7 +25,7 @@
       </div>
 
       <!-- 对话文本：强制单行不换行，超长显示省略号 -->
-      <div ref="textareaRef" class="text-[calc(15px*var(--pet-ui-scale,1))] leading-snug font-medium overflow-y-auto max-h-[calc(40px*var(--pet-ui-scale,1))]"></div>
+      <div ref="textareaRef" class="text-[calc(15px*var(--pet-ui-scale,1))] leading-snug font-medium overflow-y-auto max-h-[calc(40px*var(--pet-ui-scale,1))] text-shadow-stroke"></div>
     </div>
   </div>
 </template>
@@ -110,4 +110,17 @@ defineExpose({
 
 <style scoped>
 /* 所有样式都已成功迁移至 Tailwind CSS 类中，不再需要额外的 css */
+
+/* 字体描边效果 - 用于对话文本 */
+.text-shadow-stroke {
+  text-shadow: 
+    -0.3px -0.3px 0 rgba(0, 0, 0, 0.8),
+    0.3px -0.3px 0 rgba(0, 0, 0, 0.8),
+    -0.3px 0.3px 0 rgba(0, 0, 0, 0.8),
+    0.3px 0.3px 0 rgba(0, 0, 0, 0.8),
+    0px -0.3px 0 rgba(0, 0, 0, 0.8),
+    0px 0.3px 0 rgba(0, 0, 0, 0.8),
+    -0.3px 0px 0 rgba(0, 0, 0, 0.8),
+    0.3px 0px 0 rgba(0, 0, 0, 0.8);
+}
 </style>
