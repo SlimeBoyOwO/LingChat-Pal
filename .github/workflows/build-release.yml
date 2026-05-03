@@ -1,0 +1,192 @@
+name: 构建并发布
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_title:
+        description: 'Release 显示标题（留空则使用标签名）'
+        required: false
+        type: string
+      prerelease:
+        description: '是否为预发布版'
+        required: false
+        default: false
+        type: boolean
+
+# 设置权限，允许创建 Release 和上传资产
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.check_tag.outputs.tag_name }}
+      is_prerelease: ${{ github.event.inputs.prerelease }}
+      release_title: ${{ steps.set_title.outputs.release_title }}
+      platforms_json: ${{ steps.set_platforms.outputs.platforms_json }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 验证当前 ref 是否为标签
+        id: check_tag
+        run: |
+          TAG=$(git describe --exact-match --tags HEAD 2>/dev/null || true)
+          if [ -z "$TAG" ]; then
+            echo "错误：当前 ref 不是一个标签。请在下拉列表中选择一个标签再触发工作流。"
+            exit 1
+          fi
+          echo "tag_name=$TAG" >> $GITHUB_OUTPUT
+          echo "当前标签：$TAG"
+
+      - name: 设置 Release 标题
+        id: set_title
+        run: |
+          TITLE="${{ github.event.inputs.release_title }}"
+          if [ -z "$TITLE" ]; then
+            TITLE="${{ steps.check_tag.outputs.tag_name }}"
+          fi
+          echo "release_title=$TITLE" >> $GITHUB_OUTPUT
+
+      - name: 设置固定平台列表
+        id: set_platforms
+        run: |
+          # 构建三个平台：windows, linux-amd64, linux-aarch64
+          echo "platforms_json=['windows','linux-amd64','linux-aarch64']" >> $GITHUB_OUTPUT
+
+  build:
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        platform: ${{ fromJSON(needs.prepare.outputs.platforms_json) }}
+        include:
+          - platform: windows
+            os: windows-latest
+            artifact_name: lingchat-pal.exe
+          - platform: linux-amd64
+            os: ubuntu-latest
+            artifact_name: lingchat-pal.AppImage
+          - platform: linux-aarch64
+            os: ubuntu-24.04-arm
+            artifact_name: lingchat-pal.AppImage
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag_name }}
+          lfs: true
+
+      - name: 安装 Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: 安装系统依赖 (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
+
+      - name: 安装 pnpm
+        run: npm i -g pnpm
+
+      - name: 设置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: 安装项目依赖
+        run: pnpm i
+
+      - name: 构建 Tauri 应用 (Windows)
+        if: matrix.platform == 'windows'
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        run: pnpm tauri build
+
+      - name: 上传构建产物（供后续 release 使用）
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v7
+        with:
+          name: package-${{ matrix.platform }}
+          path: src-tauri/target/release/lingchat-pal.exe
+          archive: false
+
+      - name: 构建 Tauri 应用 (Linux)
+        if: matrix.platform == 'linux-amd64' || matrix.platform == 'linux-aarch64'
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        run: pnpm tauri build
+
+      - name: 上传构建产物（供后续 release 使用）
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: package-${{ matrix.platform }}
+          path: src-tauri/target/release/bundle/appimage/*.AppImage
+          archive: false
+
+  # 发布到 GitHub Release
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare.outputs.tag_name }}
+
+      - name: 下载所有平台的构建包
+        uses: actions/download-artifact@v8
+        with:
+          path: ./artifacts
+          merge-multiple: true
+          skip-decompress: true
+
+      - name: 创建或更新 Release 并上传所有资产
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG="${{ needs.prepare.outputs.tag_name }}"
+          TITLE="${{ needs.prepare.outputs.release_title }}"
+          PRERELEASE="${{ needs.prepare.outputs.is_prerelease }}"
+
+          # 检查或创建 Release
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在，将上传资产到现有 Release"
+          else
+            echo "Release $TAG 不存在，正在创建..."
+            gh release create "$TAG" --title "$TITLE" --prerelease="$PRERELEASE" --notes "自动构建的 Release"
+          fi
+
+          # 获取所有文件（包括子目录中的文件）
+          echo "正在收集 artifacts 目录下的所有文件..."
+          mapfile -t files < <(find ./artifacts -type f)
+
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "错误：artifacts 目录下没有文件"
+            exit 1
+          fi
+
+          echo "找到 ${#files[@]} 个文件待上传："
+          printf '%s\n' "${files[@]}"
+
+          # 逐个上传所有文件
+          for file in "${files[@]}"; do
+            echo "正在上传 $file ..."
+            gh release upload "$TAG" "$file" --clobber
+            echo "✓ 上传完成：$file"
+          done
+
+          echo "✅ 所有 ${#files[@]} 个资产上传完成"
